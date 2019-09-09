@@ -94,7 +94,7 @@ Run the following command when you make changes to the systemd services files to
 sudo systemctl daemon-reload
 ```
 
-## Step 4: Setup k3s as a systemd service (using Docker)
+## Step 4: Setup k3s as a systemd service (using conterinerd)
 
 This is essentially the same as the above except for the `ExecStar=/usr/local/bin/k3s server --docker` line except it is without `--docker`.
 
