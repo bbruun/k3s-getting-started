@@ -311,13 +311,42 @@ metadata:
   name: nginx
 spec:
   rules:
-  - host: localhost
+  - host: UNIQUE_FQDN
     http:
       paths:
       - backend:
           serviceName: nginx
           servicePort: 80
         path: /*
+```
+**NOTE:** The **_UNIQUE_FQDN_** is either a DNS entry you already have for the server eg nginx.example.com in your /etc/hosts file or setup in your companies DNS registry.
+
+The Ingress works on FQDN's and not IP addresses, so `localhost` is not a valid name nor subdomains for it as /etc/hosts do not do dynamic resolutions.
+
+You can get the Ingress Service IP address that `k3s` has hooked into using the command
+
+```
+k -n kube-system get svc -o yaml | grep ip:
+```
+Or if you have [jq](https://stedolan.github.io/jq/download/) installed then you can get _only_ the IP address using this command:
+
+```
+kubectl -n kube-system get svc -o json | jq -r '.items[].status.loadBalancer.ingress[0].ip'
+```
+
+Using that IP address you can setup a `/etc/hosts` entry using the command
+
+
+```
+export IP=$(kubectl -n kube-system get svc -o json | jq -r '.items[].status.loadBalancer.ingress[0].ip'  |grep -v "^$" |grep -v null)
+echo "$IP   nginx.example.com" | tee -a /etc/hosts
+```
+
+If you run `k3s` on a laptop that changes IP _all the time_ then use this command to update the /etc/hosts file to have only **one** updated `nginx.example.com` DNS entry  in your /etc/hosts file at any given time that will work once you deploy nginx like above:
+
+```
+export IP=$(kubectl -n kube-system get svc -o json | jq -r '.items[].status.loadBalancer.ingress[0].ip'  |grep -v "^$" |grep -v null)
+sed -i "s,^.*nginx.example.com,$IP   nginx.example.com,g" /etc/hosts
 ```
 
 ## Setup a namespace for `nginx` to run in 
@@ -350,4 +379,4 @@ kubectl -n nginx rollout status deployment nginx
 ```
 Src: [https://www.mankier.com/1/kubectl-rollout-status]
 
-Once the 3 `kubectl` or `kubectl rollout status` commands are OK aka everything is running then you should be able to open [http://localhost](http://localhost) and see the default `nginx` webpage.
+Once the 3 `kubectl` or `kubectl rollout status` commands are OK aka everything is running then you should be able to open [http://nginx.example.com](http://nginx.example.com) and see the default `nginx` webpage. (remeber to update your /etc/hosts file or company DNS to point to the correct `k3s` IP address (usually the only non-local IP on the server/desktop)).
