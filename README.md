@@ -186,7 +186,7 @@ The k3s deployment comes with its own built in `kubectl` command which you can e
 * setup as an alias (better)
 * install the full `kubectl` client (best)
 
-### Using the built in `kubectl` command:
+### Using the built in `kubectl` command (cumbersome):
 
 This section will help you setup `kubectl` which will can be done in several ways. Chose one and later when referencing `kubectl` it will be either of these you use, but it will also be the `kubectl` you use when reading and using documentation from the Internet.
 
@@ -197,7 +197,7 @@ This section will help you setup `kubectl` which will can be done in several way
 sudo /usr/local/bin/k3s kubectl <commands>
 ```
 
-### Using the built in `kubectl` command as an alias:
+### Using the built in `kubectl` command as an alias (better):
 
 You can setup a terminal alias for the above built in `k3s kubectl` command by updating your ~/.bashrc which will enalbe the command on every reboot hence forth.
 
@@ -215,7 +215,7 @@ You can run the command above in the terminal.
 
 Please note that this method will require your `sudo` password on the first run and when ever your sudo-timout has run out.
 
-### Using the official `kubectl` command
+### Using the official `kubectl` command (best):
 
 Since you might be using a distro that is special or not then follow the guide at [https://kubernetes.io](https://kubernetes.io/docs/tasks/tools/install-kubectl/) to install the `kubectl` tool on your system.
 
