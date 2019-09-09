@@ -231,7 +231,7 @@ You should now be able to run the command `kubectl` and have `k3s` at your finge
 
 Once you've started `k3s`and setup/decided on a `kubectl` method then run the following commands to make sure `k3s` is up and running:
 
-## Get the node - to see if it is running
+## Get the node list to see if it is running
 ```
 kubectl get nodes
 ```
