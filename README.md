@@ -257,6 +257,8 @@ Take a small `nginx` example:
 
 ## Preparing the `nginx` Deployment files (declarative YAML configuration)
 
+(these files are availabe under [nginx-deployment](nginx-deployment/README.md))
+
 Create a `nginx` directory for the YAML files needed to deploy `nginx` to `k3s` eg :
 
 ```
