@@ -350,3 +350,4 @@ kubectl -n nginx rollout status deployment nginx
 ```
 Src: [https://www.mankier.com/1/kubectl-rollout-status]
 
+Once the 3 `kubectl` or `kubectl rollout status` commands are OK aka everything is running then you should be able to open [http://localhost](http://localhost) and see the default `nginx` webpage.
