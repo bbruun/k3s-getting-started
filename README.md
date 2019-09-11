@@ -306,4 +306,4 @@ kubectl -n nginx get <tab><tab>
 # get logs for a particular pod (if there are multiple they will be shown so you can chose the next alphanumeric character of the pods name you want to get logs from)
 kubectl -n nginx lo<tab> <tab><tab>
 ```
-If you use an alternat shell then run `kubectl completion -h` to get help to setup completion.
+If you use an alternate shell then run `kubectl completion -h` to get help to setup completion.
