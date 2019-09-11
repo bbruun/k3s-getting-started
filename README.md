@@ -1,357 +1,309 @@
-# k3s-getting-started
+# k3s Install Process step-by-step
 
-Getting started with k3s - 5 minus k8s
+**Notes:**
+- This guide is spawned both because of a friend and [this Rancher k3s GitHub](https://github.com/rancher/k3s/issues/795#issuecomment-530440037) issue.
+- This guide is made from a fresh install of a [Ubuntu 18.04 Server](https://ubuntu.com/download/server) in VirtualBox.
+- The Ubuntu 18.04 Server (hence forth just 'server') only has OpenSSH pre-installed during installation.
+    - Docker was not pre-installed as it is a [snap](https://snapcraft.io) version - **it does not work well with `k3s` - DO NOT PRE-INSTALL IT** 
+    
 
-This is a quick installation guide for [k3s](https://k3s.io) with the setup of `kubectl` to get started including a smalll `nginx` deployment.
+## Requirements before you get started
 
-## What is k3s
+* Before you start them make sure your computer is able to go on the Internet (aka `ping google.com -c1`)
+* If needed: Install [Docker](https://docs.docker.com/v17.09/engine/installation/linux/docker-ce/ubuntu/) using the proper installation method and **DO NOT use the _snap_ version provided by default via `apt/apt-get` - it is not working properly with `k3s`**
+(note only install Docker if you need it - it can be omitted)
 
-k3s is a stripped version of the official fullblown Kubernetes source where the implementations for Amazon, Google, Azure hosting centers have been pulled and some of the subsystems (drivers) for Volumes etc. have been pulled so you can run a full blown Kubernets cluster at home or on remote places on small devices like a Rasberry Pi and still use the tools you do for managing a Kubernetes cluster.
+## Download `k3s` from GitHub and install the binary
 
-k3s is also a great alternative for [minikube](https://kubernetes.io/docs/setup/learning-environment/minikube/) ans similar that run the full blown Kubernets and hence the requirements.
+From [https://github.com/rancher/k3s](https://github.com/rancher/k3s) open the [`releases`](https://github.com/rancher/k3s/releases) page and find the latest stable version (as of this writing it is `0.8.1` and that is what is used in the documentation below).
 
-Read more about `k3s` at [k3s](https://k3s.io)
+Download the appropriate binary for your architecture - for 64bit Intel/AMD based GNU/Linux servers/computers it is the binary simply named `k3s`.
+If you happen to have another architecture then copy the link to the the appropriate binary and remember to correct for filenames along the documentation in examples. 
 
-This guide is split in 4 sections
 
-- installing `k3s` making it ready for use
-- setup k3s as a systemd service
-- setup `kubectl` to interact with `k3s`
-- deploy a simple `nginx` service
 
-## Installation requirements (linux description only)
+**Download it using `wget` or `curl`**
+Note: Exchange the URL `https://github..../k3s` with the architecture version you need  
 
-To install k3s make sure you have the following
-
-1. A fully functioning x86_64 bit GNU/Linux installation (server or desktop will do)
-2. Approx 500MB free RAM at your disposal
-3. A few GB of free space (Docker images take up space - they are not free from reality)
-4. Root access (you need root to run k3s)
-5. Internet access
-
-## Install k3s (linux description only)
-
-### Step 1: Download and place binary the correct place
-
-Go to [https://github.com/rancher/k3s/releases](https://github.com/rancher/k3s/releases) and download the latest stable version (aka not one ending in `rc1` or `beta` etc).
-There are a few binaries but you only need the one named `k3s`.
-
-Download it to your laptop eg for k3s version 0.8.1
-
+**Using wget**
 ```bash
-wget https://github.com/rancher/k3s/releases/download/v0.8.1/k3s
+wget https://github.com/rancher/k3s/releases/download/v0.8.1/k3s -O /tmp/k3s
+```
+**Using curl**
+```bash
+curl https://github.com/rancher/k3s/releases/download/v0.8.1/k3s -o /tmp/k3s
 ```
 
-Make it executable and place it in /usr/local/bin/ 
+
+**Install the binary in /usr/local/bin/**
 
 ```bash
-chmod +x k3s
-sudo mv k3s /usr/local/bin/
+chmod +x /tmp/k3s
+sudo mv /tmp/k3s /usr/local/bin/
 ```
 
-### Step 2: Decide if you want to use `Docker` or `containerd`
+## Running k3s
 
-If you alread have [Docker](https://www.docker.com) installed then go with `Step 3` below make k3s utilize your already existing [Docker](https://www.docker.com) installation.
+There are several ways to run `k3s`.
 
-If you don't have Docker installed and don't plan on it either then go with `Step 4` which will utilize `containerd` which is the core of [Docker](https://www.docker.com) but isn't [Docker](https://www.docker.com)
+- manually as `root` (or using `sudo`) all the time
+- as a service you can start and stop
+- as a boot service that will start when you boot your computer/or your computer is rebooted 
 
-### Step 3: Setup k3s as a systemd service (using Docker)
+### Setup as a systemd service (manual and boot enabled)
 
-Read the [systemd integration](README-systemd.md) for better systemd service integration.
+This documentation has Docker pre-installed on the server used for documentation but if you don't plan on working with Docker your self then you can choose to use the other systemd service file.
 
-### Step 5: Using the k3s service
+Download either of these 
+- [k3s.service-docker](https://github.com/bbruun/k3s-getting-started/blob/master/k3s.service-docker) **if you have Docker installed**
+- [k3s.service-containerd](https://github.com/bbruun/k3s-getting-started/blob/master/k3s.service-containerd) **if you don't use Docker**
 
-You can now start and stop the k3s service as you please.
+The difference is that `k3s` can utilize the aleady installed Docker service (assuming it is running), but it can also work perfectly well without by using its own [containerd](https://containerd.io) runtime. 
 
-## Start and stop `k3s`
+The service file is to be installed in `/etc/systemd/system/` as `k3s.service`:
+
+**Systemd service with using Docker** 
+```bash
+wget https://github.com/bbruun/k3s-getting-started/blob/master/k3s.service-docker -O /tmp/k3s.service
+sudo mv /tmp/k3s.service /etc/systemd/system/
+sudo touch /etc/systemd/system/k3s.service.env
+sudo systemctl daeamon-reload
+```
+
+**Systemd service with using built-in containerd** 
+```bash
+wget https://github.com/bbruun/k3s-getting-started/blob/master/k3s.service-containerd -O /tmp/k3s.service
+sudo mv /tmp/k3s.service /etc/systemd/system/
+sudo touch /etc/systemd/system/k3s.service.env
+sudo systemctl daeamon-reload
+```
+
+### Enable it as a boot service
+
+If you are only planning on test running `k3s` then you can skip this step.
+
+```bash
+sudo systemctl enable k3s
+``` 
 
 
-## Start k3s
+## First run (manual)
 
+After completing installation above you have 2 options to start `k3s`
+
+When `k3s` starts up it needs to install a few files and generate some certificates.
+All depending on the CPU(s) and memory on the server it can take a few minutes (especially on a Rasberry Pi).
+
+- use systemd (recommended)
+- manually (might be helpfull to debug start/runtime issues)
+
+### Starting `k3s` manually
+
+To start `k3s` manually run the following command and if it is the first time then wait a litte as described above.
+**If you have Docker installed**
+```bash
+sudo k3s server --docker 
+```
+
+**If you don't have Docker installed**
+
+```bash
+sudo k3s server 
+```
+Notes: 
+- for both of the above  `sudo k3s server [--docker]` commands you see a lot of output.
+- the output never ends as `k3s` has been started in the foreground like any program (use Ctrl-c to stop it)
+- the output should end with a lot of messages starting with `I0911 ....` or similar - that indicates it is ready.
+- don't worry if you see some error messages, this is not a final version yet (aka 0.8.1 which this documentation is written for)
+
+**After start**
+
+Once you've started `k3s` and you can see a log entry in the `I0911 ...` lines similar to the following it is ready for usage.
+```text
+I0911 18:41:19.047381    6814 flannel.go:102] Using interface with name enp0s3 and address 192.168.64.143
+```  
+
+## Communicating with `k3s`
+
+There are 3 ways to communicate with Kubernetes - be it `k3s` or any of the hosted versions including a bare metal installation using another guide is to use `kubectl`.
+
+`k3s` comes with its own built in `kubectl` command that you can use like so 
+```bash
+sudo k3s kubectl <commands>
+```
+
+The first `<command>`  to run is `get nodes` and `get pods --all-namespaces` to verify the installation
+```bash
+sudo k3s kubectl get nodes
+sudo k3s kubectl get pods --all-namespaces
+```
+
+You should see something similar to this:
+```bash
+$ sudo k3s kubectl get nodes
+NAME     STATUS   ROLES    AGE   VERSION
+k3sdoc   Ready    master   10m   v1.14.6-k3s.1
+$ sudo k3s kubectl get pods --all-namespaces
+NAMESPACE     NAME                         READY   STATUS    RESTARTS   AGE
+kube-system   coredns-b7464766c-hxtfj      1/1     Running   0          11m
+kube-system   helm-install-traefik-rfpcp   0/1     Completed   0          2m6s
+kube-system   svclb-traefik-p8jkt          2/2     Running   0          10m
+kube-system   traefik-5c79b789c5-fvb9z     1/1     Running   0          10m
+```
+
+The first command above shows that `k3s` has one registered worker node named `k3sdoc` which is the servers name (it will be different for your computer)
+The second command shows 3 pods running and 1 completed.
+
+The pod that has completed is a one-time pod used to setup `traefik` (the Ingress controller) and can be removed using the command
+```bash
+sudo k3s kubectl -n kube-system delete pod helm-install-traefik-rfpcp
+pod "helm-install-traefik-rfpcp" deleted
+``` 
+
+## Your first deployment
+
+Remember the IP address from the **Requirements** section? Now you need the IP address
+If you don't then you can alwasys get it via the following command
+
+```bash
+sudo k3s kubectl get services --namespace kube-system traefik --output jsonpath='{.status.loadBalancer.ingress[0].ip}' 
+``` 
+
+The IP address is needed for you to setup one or more DNS entries pointing to it or local /etc/hosts entries eg 
+```bash
+x.x.x.x     www.example.com nginx.example.com example.com
+```
+(replace x.x.x.x with the IP from the above command)
+
+This will enable you to setup an Ingress object so you can have multiple services running on the same IP - think of it as a load balancer.
+
+### Setting up a Nginx service
+
+In this repo there is a directory named [nginx-deployment](nginx-deployment/) where there are 3 files in it.
+
+The 3 files are 
+- nginx-deployment.yml
+- nginx-service.yml
+- nginx-ingress.yml
+
+You need to update the `nginx-ingress.yml` file with the FQDN you setup on your DNS or in /etc/hosts unless you setup **nginx.example.com**
+
+Download the 3 files and apply them to `k3s` in a new namespace (namespaces are virtual "rooms" that separate applications from each other like directories do for files)
+
+**Create a new namespace: nginx**
+```bash
+sudo k3s kubectl create namespace nginx
+```
+
+**Apply the 3 files to the `nginx` namespace**
+```bash
+sudo k3s kubectl create ns nginx
+sudo k3s kubectl -n nginx create -f nginx-deployment.yml
+sudo k3s kubectl -n nginx create -f nginx-service.yml 
+sudo k3s kubectl -n nginx create -f nginx-ingress.yml 
+```
+
+For each of the commands you should get one line back from `k3s kubectl ...` which is 
+- `namespace/nginx created` when creating the namespace 
+- `deployment.apps/nginx created` when creating the Deployment
+- `service/nginx created` when creating the Service
+- `ingress.extensions/nginx created` when creating the Ingress object
+
+After a little while you'll be able to see the setup using the following commands:
+```bash
+sudo k3s kubectl --namespace nginx get deployments
+sudo k3s kubectl --namespace nginx get pods
+sudo k3s kubectl --namespace nginx get services
+sudo k3s kubectl --namespace nginx get ingresses
+```
+
+Each of these will show you one or more lines. Each line explains the current state of the Deployment, Pod(s), Service and Ingress controller.
+
+**Check if Nginx is working**
+
+```bash
+curl http://nginx.example.com
+```
+
+**Congratulations**
+
+
+## First run using the systemd service
+
+If you followd the above systemd setup then you should be able to run the following commands to start/stop `k3s`
+
+**Start `k3s`**
 ```bash
 sudo systemctl start k3s
-```
+``` 
 
-### Stop k3s
-
+**Stop `k3s`**
 ```bash
 sudo systemctl stop k3s
 ```
 
-## Running k3s as a boot service
+### Enable `k3s` as a boot service
 
-If you've followd the above installation steps and is able to start/stop k3s using the above `systemctl` commands then you can enable (or disable) it as a boot service to it will start when you boot your server/desktop or your remote _Rasberry Pi_ out in the shed...
-
-**To enable as boot service**
+If you get tired of manually starting and stopping `k3s` and just want it ready on boot then enable it as a boot service
 
 ```bash
 sudo systemctl enable k3s
 ```
 
-**To disable as boot service**
+And on subsequent boots and reboots you'll have `k3s` ready as a service.
+
+
+## Kubectl tips and tricks
+
+### Use the official `kubectl` (recommended)
+
+It is nice that `k3s` comes with its own built in `kubectl` command, but it can be cumbersome to work with in the long run.
+
+You can install and use the official `kubectl` which can be installed using [this installation guide](https://kubernetes.io/docs/tasks/tools/install-kubectl/).
+
+Once installed on your computer then setup a KUBECONFIG file for your user so you can avoid using `sudo k3s kubectl` all the time
 
 ```bash
-sudo systemctl disable k3s
+mkdir ~/.kube
+sudo cat /etc/rancher/k3s/k3s.yaml | tee ~/.kube/config
 ```
 
-Note: you'll still be able to manually stop and start (and restart) the k3s service if it is running as a boot service using the `sudo systemctl [start|stop|restart] k3s` command(s).
+Now you can use `kubectl` without using `sudo`.
 
-## First run after installation
+Note: If you delete `k3s` or upgrade it and something breaks the YAML file in /etc/rancher/ then you need to re-do the above command to make `kubectl` work again. 
 
-After the installation above as a systemd service then start k3s using the command
 
+
+### Use `sudo k3s kubectl` as an alias
+Note: This does not apply if you installed the offical `kubectl`
+
+Setup a shell alias for the command.   
+Add the following to ~/.bashrc and source the file
+
+(Use `vim ~/.bashrc`)
 ```bash
-sudo systemctl start k3s
+echo 'alias kubectl="sudo /usr/local/bin/k3s kubectl "' | tee -a ~/.bashrc
+source ~/.bashrc
 ```
 
-The first start takes a little while as k3s needs to 
+After that and all subsequent reboots you'll be able to run `kubectl <commands>` with out the `sudo k3s kubectl ` part.
 
-- Unpack some files
-- Create some certificates (this requires CPU)
-- Initiate the core services
+### Command completion for `kubectl` 
 
-## Setting up the `kubectl` command
-
-The k3s deployment comes with its own built in `kubectl` command which you can either
-
-- use directly on every command (cumbersome)
-- setup as an alias (better)
-- install the full `kubectl` client (best)
-
-### Using the built in `kubectl` command (cumbersome)
-
-This section will help you setup `kubectl` which will can be done in several ways. Chose one and later when referencing `kubectl` it will be either of these you use, but it will also be the `kubectl` you use when reading and using documentation from the Internet.
-
-`k3s` comes with a built in `kubectl` command which can be used like this:
-
+If you use the BASH shell (most likely you do) then run the following command and logout and then login again
 ```bash
-sudo /usr/local/bin/k3s kubectl <commands>
-```
-
-### Using the built in `kubectl` command as an alias (better)
-
-You can setup a terminal alias for the above built in `k3s kubectl` command by updating your ~/.bashrc which will enalbe the command on every reboot hence forth.
-
+kubectl completion bash | tee -a ~/.profile
+source ~/.profile
+```  
+You can now use <TAB> completion for most commands and pod lookups just like on the file system eg
 ```bash
-alias kubectl="sudo /usr/local/bin/k3s kubectl "
+# get a list of namespaces
+kubectl -n <tab><tab>
+
+# get a list of what you can get from the namespace (it is a lot)
+kubectl -n nginx get <tab><tab>
+
+# get logs for a particular pod (if there are multiple they will be shown so you can chose the next alphanumeric character of the pods name you want to get logs from)
+kubectl -n nginx lo<tab> <tab><tab>
 ```
-
-Before you can use the alias you need to do either of the following:
-
-- run the above alias command in your terminal (once per terminal you want to work on right now)
-- source the ~/.bashrc file eg `source ~/.bashrc` to activate the alias
-- logout and then log  back in again as this will source the alias for you automatically
-
-You can run the command above in the terminal.
-
-Please note that this method will require your `sudo` password on the first run and when ever your sudo-timout has run out.
-
-### Using the official `kubectl` command (best)
-
-Since you might be using a distro that is special or not then follow the guide at [https://kubernetes.io](https://kubernetes.io/docs/tasks/tools/install-kubectl/) to install the `kubectl` tool on your system.
-
-After installation you need to setup a `~/.kube/config` file for your user (other wise you'll end up needing to use sudo and set the environment variable KUBECONFIG every time you want to use k3s - that isn't advised).
-
-1. Create the directory `~/.kube` using the command ```mkdir ~/.kube```
-2. Copy the `k3s` kube config file to your directory using the command ```sudo cat /etc/rancher/k3s/k3s.yaml > ~/.kube/config```
-
-You should now be able to run the command `kubectl` and have `k3s` at your fingertips :-)
-
-## Make sure everything is working as expected
-
-Once you've started `k3s`and setup/decided on a `kubectl` method then run the following commands to make sure `k3s` is up and running:
-
-### Get the node list to see if it is running
-
-```bash
-kubectl get nodes
-```
-
-You should see 2 lines - a named column line and a line with the computer you are running `k3s` on.
-
-### Get a list of all pods
-
-```bash
-kubectl get pods --all-namespaces
-```
-
-You should see column list of namespaces and pods names and some extra information for each pod.
-
-## Your first deployoment
-
-To deploy to `k3s` you need 3 things
-
-1. a `kind: Deployment`
-2. a `kind: Service`
-3. a `kind: Ingress`
-
-Take a small `nginx` example:
-
-## Preparing the `nginx` Deployment files (declarative YAML configuration)
-
-(these files are availabe under [nginx-deployment](nginx-deployment/))
-
-Create a `nginx` directory for the YAML files needed to deploy `nginx` to `k3s` eg :
-
-```bash
-mkdir ~/nginx-deployment
-cd ~/nginx-deployment
-```
-
-In this directory you'll create 3 files (or download them from the [nginx-deployment](nginx-deployment) directory)
-
-`nginx-deployment.yml` with following content:
-
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: nginx
-spec:
-  selector:
-    matchLabels:
-      app: nginx
-  replicas: 2
-  template:
-    metadata:
-      labels:
-        app: nginx
-    spec:
-      containers:
-      - name: nginx
-        image: nginx:1.7.9
-        ports:
-        - containerPort: 80
-```
-
-`nginx-service.yml` with following content:
-
-```yaml
-apiVersion: v1
-kind: Service
-metadata:
-  name: nginx
-spec:
-  ports:
-  - port: 80
-    protocol: TCP
-    targetPort: 80
-  type: NodePort
-  selector:
-    app: nginx
-```
-
-`nginx-ingress.yml` with following content:
-
-```yaml
-apiVersion: extensions/v1beta1
-kind: Ingress
-metadata:
-  name: nginx
-spec:
-  rules:
-  - host: UNIQUE_FQDN
-    http:
-      paths:
-      - backend:
-          serviceName: nginx
-          servicePort: 80
-        path: /*
-```
-
-**NOTE:** The **_UNIQUE_FQDN_** is either a DNS entry you already have for the server eg nginx.example.com in your /etc/hosts file or setup in your companies DNS registry.
-
-The Ingress works on FQDN's and not IP addresses, so `localhost` is not a valid name nor subdomains for it as /etc/hosts do not do dynamic resolutions.
-
-You can get the Ingress Service IP address that `k3s` has hooked into using the command
-
-```bash
-kubectl -n kube-system get svc -o yaml | grep ip:
-```
-
-Or if you have [jq](https://stedolan.github.io/jq/download/) installed then you can get _only_ the IP address using this command:
-
-```bash
-kubectl -n kube-system get svc -o json | jq -r '.items[].status.loadBalancer.ingress[0].ip'
-```
-
-Using that IP address you can setup a `/etc/hosts` entry using the command
-
-```bash
-export IP=$(kubectl -n kube-system get svc -o json | jq -r '.items[].status.loadBalancer.ingress[0].ip'  |grep -v "^$" |grep -v null)
-echo "$IP   nginx.example.com" | tee -a /etc/hosts
-```
-
-If you run `k3s` on a laptop that changes IP _all the time_ then use this command to update the /etc/hosts file to have only **one** updated `nginx.example.com` DNS entry  in your /etc/hosts file at any given time that will work once you deploy nginx like above:
-
-```bash
-export IP=$(kubectl -n kube-system get svc -o json | jq -r '.items[].status.loadBalancer.ingress[0].ip'  |grep -v "^$" |grep -v null)
-sed -i "s,^.*nginx.example.com,$IP   nginx.example.com,g" /etc/hosts
-```
-
-## Setup a namespace for `nginx` to run in 
-
-Run the following command to create a namespace for `nginx` to run in
-
-```bash
-kubectl create namespace nginx
-```
-
-## Deploy `nginx` to `k3s`
-
-Make sure you are in the directory you created the above 3 YAML files.
-
-Run the following commands:
-
-```bash
-kubectl -n nginx create -f nginx-deployment.yml
-kubectl -n nginx create -f nginx-service.yml
-kubectl -n nginx create -f nginx-ingress.yml
-```
-
-You can view the status of the deployment using the command
-
-```bash
-kubectl -n nginx describe deployment nginx
-```
-
-Or just wait for it to finish with the command if you trust your Internet and YAML files (typos)
-
-```bash
-kubectl -n nginx rollout status deployment nginx
-```
-
-Src: [https://www.mankier.com/1/kubectl-rollout-status](https://www.mankier.com/1/kubectl-rollout-status)
-
-Once the 3 `kubectl` or `kubectl rollout status` commands are OK aka everything is running then you should be able to open [http://nginx.example.com](http://nginx.example.com) and see the default `nginx` webpage. (remeber to update your /etc/hosts file or company DNS to point to the correct `k3s` IP address (usually the only non-local IP on the server/desktop)).
-
-If you use eg _curl_ then the output would be something like this:
-
-```bash
-$ curl http://nginx.example.com
-<!DOCTYPE html>
-<html>
-<head>
-<title>Welcome to nginx!</title>
-<style>
-    body {
-        width: 35em;
-        margin: 0 auto;
-        font-family: Tahoma, Verdana, Arial, sans-serif;
-    }
-</style>
-</head>
-<body>
-<h1>Welcome to nginx!</h1>
-<p>If you see this page, the nginx web server is successfully installed and
-working. Further configuration is required.</p>
-
-<p>For online documentation and support please refer to
-<a href="http://nginx.org/">nginx.org</a>.<br/>
-Commercial support is available at
-<a href="http://nginx.com/">nginx.com</a>.</p>
-
-<p><em>Thank you for using nginx.</em></p>
-</body>
-</html>
-```
+If you use an alternat shell then run `kubectl completion -h` to get help to setup completion.

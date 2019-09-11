@@ -36,4 +36,4 @@ spec:
 You can find the install and usage guide on [https://github.com/rancher/local-path-provisioner](https://github.com/rancher/local-path-provisioner)
 
 
-[Go back to main page](README.md)
+[Go back to main page](README-first-draft.md)
