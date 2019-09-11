@@ -1,4 +1,4 @@
-**This directory contains the 3 files described in the main [README.md](../README.md) file**
+**This directory contains the 3 files described in the main [README.md](../README-first-draft.md) file**
 
 
 

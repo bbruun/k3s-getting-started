@@ -20,12 +20,12 @@ If you won't ever "touch" the server then use the **containerd** version.
 
 **Docker**
 Use this systemd service file if you have Docker installed or plan on using Docker on the same server/host as `k3s` will be running on
-* [k3s.service-docker.service](k3s.service-docker.service)
+* [k3s.service-docker.service](k3s.service-docker)
 
 
 **containerd**
 Use this systemd service file if you don't have Docker installed (or plan on using Docker) eg completely remote `k3s` server eg a Rasberry Pi or similar.
-* [k3s.service-containerd.service](k3s.service-containerd.service)
+* [k3s.service-containerd.service](k3s.service-containerd)
 
 
 # Installing it
@@ -35,4 +35,4 @@ Use this systemd service file if you don't have Docker installed (or plan on usi
 3. Reload systemd `sudo systemctl daemon-reload`
 
 
-[Go back to main page](README.md)
+[Go back to main page](README-first-draft.md)
