@@ -55,8 +55,8 @@ There are several ways to run `k3s`.
 This documentation has Docker pre-installed on the server used for documentation but if you don't plan on working with Docker your self then you can choose to use the other systemd service file.
 
 Download either of these 
-- [k3s.service-docker](https://github.com/bbruun/k3s-getting-started/blob/master/k3s.service-docker) **if you have Docker installed**
-- [k3s.service-containerd](https://github.com/bbruun/k3s-getting-started/blob/master/k3s.service-containerd) **if you don't use Docker**
+- [k3s.service-docker](https://raw.githubusercontent.com/bbruun/k3s-getting-started/master/k3s.service-docker) **if you have Docker installed**
+- [k3s.service-containerd](https://raw.githubusercontent.com/bbruun/k3s-getting-started/master/k3s.service-containerd) **if you don't use Docker**
 
 The difference is that `k3s` can utilize the aleady installed Docker service (assuming it is running), but it can also work perfectly well without by using its own [containerd](https://containerd.io) runtime. 
 
@@ -179,7 +179,7 @@ This will enable you to setup an Ingress object so you can have multiple service
 
 ### Setting up a Nginx service
 
-In this repo there is a directory named [nginx-deployment](nginx-deployment/) where there are 3 files in it.
+In this repo there is a directory named [nginx-deployment](nginx-deployment) where there are 3 files in it.
 
 The 3 files are 
 - nginx-deployment.yml
