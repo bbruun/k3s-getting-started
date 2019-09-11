@@ -89,6 +89,12 @@ NAME                         READY   STATUS    RESTARTS   AGE
 pod/nginx-7cb66fc985-vpxrb   1/1     Running   0          6m30s
 ```
 
+Under the directory `/opt/local-path-provisioner/` you should now have a directory named after the PVC aka `pvc-1c1f0987-d4d3-11e9-b617-0800277d4863`.
+If you place an `index.html` file there then you'll be able to see it via Nginx on [http://nginx.example.com](http://nginx.example.com) or via curl: 
+```bash
+curl http://nginx.example.com
+```
+
 
 ## Official installation documentation and examples on GitHub
 
