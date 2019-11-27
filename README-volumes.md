@@ -7,6 +7,10 @@ You can install [local-path-provisioner](https://github.com/rancher/local-path-p
 ## Install `local-path-provisioner`
 
 ```
+# Make the required directory for the local-path-provisioner to store its data in aka the PV's where the PVC's are stored
+sudo mkdir /opt/local-path-provisioner/
+
+# Install local-path-provisioner
 kubectl create -f https://raw.githubusercontent.com/rancher/local-path-provisioner/master/deploy/local-path-storage.yaml
 ```
 
@@ -23,7 +27,7 @@ After that you should be able to add local volumes (PVC's) like so (if you insta
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: htmldir
+  name: nginx-html
   namespace: nginx
 spec:
   accessModes:
@@ -69,7 +73,7 @@ spec:
       volumes:
       - name: html
         persistentVolumeClaim:
-          claimName: htmldir
+          claimName: nginx-html
 ```
 
 Re-check the PV, PVC 
