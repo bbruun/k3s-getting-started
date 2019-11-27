@@ -1,0 +1,94 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: nginx
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nginx-html
+  namespace: nginx
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 2Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+  namespace: nginx
+spec:
+  selector:
+    matchLabels:
+      app: nginx
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.7.9
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: htmldir
+          mountPath: /usr/share/nginx/html
+      volumes:
+      - name: htmldir
+        persistentVolumeClaim:
+          claimName: nginx-html
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+  namespace: nginx
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+  type: NodePort
+  selector:
+    app: nginx
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: nginx
+  namespace: nginx
+spec:
+  rules:
+  - host: nginx.example.com
+    http:
+      paths:
+      - backend:
+          serviceName: nginx
+          servicePort: 80
+        path:
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: nginx
+  name: local-path-test
+  labels:
+    app.kubernetes.io/name: local-path-test
+data:
+  test.sh: |
+    #!/bin/sh
+    id
+    ls -al /usr/share/nginx/html&& \
+    echo 'Hello from local-path-test' && \
+    cp /config/text.txt /usr/share/nginx/html/index.html && \
+    touch /usr/share/nginx/html/foo && \
+    ls -al /usr/share/nginx/html
+  index.html: |
+    <html><body>some test content</body></html>
