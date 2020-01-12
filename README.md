@@ -54,7 +54,7 @@ The office `kubectl` uses the `~/.kube/config` file to get its configuration to 
  
 ```bash
 mkdir ~/.kube
-sudo cat /etc/rancer/k3s/k3s.yaml > ~/.kube/config
+sudo cat /etc/rancher/k3s/k3s.yaml > ~/.kube/config
 sudo rm /usr/local/bin/kubectl
 ```
 
