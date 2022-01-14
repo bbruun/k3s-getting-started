@@ -59,7 +59,7 @@ spec:
   selector:
     app: nginx
 ---
-apiVersion: extensions/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: nginx
@@ -68,11 +68,16 @@ spec:
   rules:
   - host: nginx.example.com
     http:
+
       paths:
-      - backend:
-          serviceName: nginx
-          servicePort: 80
-        path:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: nginx
+              port: 
+                number: 80
+
 ---
 apiVersion: v1
 kind: ConfigMap
