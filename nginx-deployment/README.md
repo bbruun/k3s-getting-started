@@ -36,10 +36,13 @@ spec:
   - host: nginx.example.com
     http:
       paths:
-      - backend:
-          serviceName: nginx
-          servicePort: 80
-        path: 
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: nginx
+              port: 
+                number: 80
 ```
 
 **[nginx-service.yml](nginx-service.yml)**
