@@ -27,7 +27,7 @@ spec:
 
 **[nginx-ingress.yml](nginx-ingress.yml)**
 ```
-apiVersion: extensions/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: nginx

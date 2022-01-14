@@ -26,7 +26,7 @@ spec:
   selector:
     matchLabels:
       app: nginx
-  replicas: 2
+  replicas: 1
   template:
     metadata:
       labels:
@@ -55,7 +55,7 @@ spec:
   - port: 80
     protocol: TCP
     targetPort: 80
-  type: NodePort
+  type: ClusterIP
   selector:
     app: nginx
 ---
@@ -64,6 +64,8 @@ kind: Ingress
 metadata:
   name: nginx
   namespace: nginx
+  annotations:
+    kubernetes.io/ingress.class: traefik
 spec:
   rules:
   - host: nginx.example.com
