@@ -1,4 +1,4 @@
-**This directory contains the 3 files described in the main [README.md](../README-first-draft.md) file**
+**This directory contains the 3 files described in the main [README.md](../README-first-draft.md) file** and the nginx-all-with-pvc.yml to deploy it all with a volume mounted that you can use - see below.
 
 
 
